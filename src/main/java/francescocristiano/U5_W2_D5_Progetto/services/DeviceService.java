@@ -48,11 +48,13 @@ public class DeviceService {
     }
 
     public Device findDeviceByIdAndUpdate(UUID id, NewUpdateDeviceDTO updatedDevicePayload) {
-        Device updatedDevice = new Device(DeviceType.getDeviceType(updatedDevicePayload.deviceType()), DeviceStatus.getDeviceStatus(updatedDevicePayload.deviceStatus()), updatedDevicePayload.employeeId() != null ? employeeService.findEmployeeById(updatedDevicePayload.employeeId()) : null);
         Device foundDevice = findDeviceById(id);
+        if (DeviceStatus.getDeviceStatus(updatedDevicePayload.deviceStatus()) == DeviceStatus.ASSIGNED && foundDevice.getEmployee() == null) {
+            throw new BadRequestException("Device is not assigned to an employee, cannot update device status with assigned status before assigning it to an employee");
+        }
+        Device updatedDevice = new Device(DeviceType.getDeviceType(updatedDevicePayload.deviceType()), DeviceStatus.getDeviceStatus(updatedDevicePayload.deviceStatus()), foundDevice.getEmployee());
         foundDevice.setDeviceType(updatedDevice.getDeviceType());
         foundDevice.setDeviceStatus(updatedDevice.getDeviceStatus());
-        foundDevice.setEmployee(updatedDevice.getEmployee());
         return deviceRepository.save(foundDevice);
     }
 
@@ -63,11 +65,19 @@ public class DeviceService {
     public Device assignDeviceToEmployee(UUID id, UUID employeeId) {
         Device device = findDeviceById(id);
         Employee employee = employeeService.findEmployeeById(employeeId);
-        if (device.getDeviceStatus() == DeviceStatus.ASSIGNED) {
+       /* if (device.getDeviceStatus() == DeviceStatus.ASSIGNED) {
             throw new BadRequestException("Device is already assigned to an employee");
         }
+
+        Ho preferito non usare questo controllo che avevo implementato all'inizio perchè in questo modo
+        avrebbe reso il dipendente collegato ad un dispositivo assegnato immutabile, mentre
+        io volevo qualcosa di più flessibile
+
+        */
         device.setEmployee(employee);
-        device.setDeviceStatus(DeviceStatus.ASSIGNED);
+        if (device.getDeviceStatus() != DeviceStatus.ASSIGNED) {
+            device.setDeviceStatus(DeviceStatus.ASSIGNED);
+        }
         return deviceRepository.save(device);
     }
 }

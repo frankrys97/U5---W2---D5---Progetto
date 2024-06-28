@@ -4,6 +4,7 @@ package francescocristiano.U5_W2_D5_Progetto.controllers;
 import francescocristiano.U5_W2_D5_Progetto.entities.Device;
 import francescocristiano.U5_W2_D5_Progetto.exceptions.BadRequestException;
 import francescocristiano.U5_W2_D5_Progetto.payloads.NewDeviceDTO;
+import francescocristiano.U5_W2_D5_Progetto.payloads.NewUpdateDeviceDTO;
 import francescocristiano.U5_W2_D5_Progetto.services.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -52,11 +53,16 @@ public class DeviceController {
 
 
     @PutMapping("/{id}")
-    public Device updateDeviceById(@PathVariable UUID id, @RequestBody @Validated NewDeviceDTO devicePayload, BindingResult validationResult) {
+    public Device updateDeviceById(@PathVariable UUID id, @RequestBody @Validated NewUpdateDeviceDTO devicePayload, BindingResult validationResult) {
         if (validationResult.hasErrors()) {
             throw new BadRequestException(validationResult.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(", ")));
         }
         return deviceService.findDeviceByIdAndUpdate(id, devicePayload);
+    }
+
+    @PatchMapping("/{id}/assign")
+    public Device assignDeviceToEmployee(@PathVariable UUID id, @RequestParam UUID employeeId) {
+        return deviceService.assignDeviceToEmployee(id, employeeId);
     }
 
 

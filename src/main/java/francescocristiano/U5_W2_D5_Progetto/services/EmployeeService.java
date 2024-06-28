@@ -23,6 +23,9 @@ public class EmployeeService {
         employeeRepository.findByUsername(employeePayload.username()).ifPresent(employee -> {
             throw new BadRequestException("Username already exists");
         });
+        employeeRepository.findByEmail(employeePayload.email()).ifPresent(employee -> {
+            throw new BadRequestException("Email already exists");
+        });
         Employee newEmployee = new Employee(employeePayload.username(), employeePayload.name(), employeePayload.surname(), employeePayload.email());
         return employeeRepository.save(newEmployee);
     }

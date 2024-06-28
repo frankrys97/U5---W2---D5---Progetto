@@ -4,8 +4,10 @@ import francescocristiano.U5_W2_D5_Progetto.entities.Device;
 import francescocristiano.U5_W2_D5_Progetto.entities.Employee;
 import francescocristiano.U5_W2_D5_Progetto.enums.DeviceStatus;
 import francescocristiano.U5_W2_D5_Progetto.enums.DeviceType;
+import francescocristiano.U5_W2_D5_Progetto.exceptions.BadRequestException;
 import francescocristiano.U5_W2_D5_Progetto.exceptions.NotFoundException;
 import francescocristiano.U5_W2_D5_Progetto.payloads.NewDeviceDTO;
+import francescocristiano.U5_W2_D5_Progetto.payloads.NewUpdateDeviceDTO;
 import francescocristiano.U5_W2_D5_Progetto.repositories.DeviceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -26,11 +28,11 @@ public class DeviceService {
     private EmployeeService employeeService;
 
     public Device saveDevice(NewDeviceDTO devicePayload) {
-        Employee employee = null;
+      /*  Employee employee = null;
         if (devicePayload.employeeId() != null) {
             employee = employeeService.findEmployeeById(devicePayload.employeeId());
-        }
-        Device newDevice = new Device(DeviceType.getDeviceType(devicePayload.deviceType()), DeviceStatus.getDeviceStatus(devicePayload.deviceStatus()), employee);
+        }*/
+        Device newDevice = new Device(DeviceType.getDeviceType(devicePayload.deviceType()), DeviceStatus.ONLINE, null);
         return deviceRepository.save(newDevice);
     }
 
@@ -45,7 +47,7 @@ public class DeviceService {
         return deviceRepository.findAll(pageable);
     }
 
-    public Device findDeviceByIdAndUpdate(UUID id, NewDeviceDTO updatedDevicePayload) {
+    public Device findDeviceByIdAndUpdate(UUID id, NewUpdateDeviceDTO updatedDevicePayload) {
         Device updatedDevice = new Device(DeviceType.getDeviceType(updatedDevicePayload.deviceType()), DeviceStatus.getDeviceStatus(updatedDevicePayload.deviceStatus()), updatedDevicePayload.employeeId() != null ? employeeService.findEmployeeById(updatedDevicePayload.employeeId()) : null);
         Device foundDevice = findDeviceById(id);
         foundDevice.setDeviceType(updatedDevice.getDeviceType());
@@ -56,5 +58,16 @@ public class DeviceService {
 
     public void deleteDeviceById(UUID id) {
         deviceRepository.deleteById(id);
+    }
+
+    public Device assignDeviceToEmployee(UUID id, UUID employeeId) {
+        Device device = findDeviceById(id);
+        Employee employee = employeeService.findEmployeeById(employeeId);
+        if (device.getDeviceStatus() == DeviceStatus.ASSIGNED) {
+            throw new BadRequestException("Device is already assigned to an employee");
+        }
+        device.setEmployee(employee);
+        device.setDeviceStatus(DeviceStatus.ASSIGNED);
+        return deviceRepository.save(device);
     }
 }

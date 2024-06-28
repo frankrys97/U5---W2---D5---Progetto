@@ -2,6 +2,7 @@ package francescocristiano.U5_W2_D5_Progetto.services;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import francescocristiano.U5_W2_D5_Progetto.config.MailgunSender;
 import francescocristiano.U5_W2_D5_Progetto.entities.Employee;
 import francescocristiano.U5_W2_D5_Progetto.exceptions.BadRequestException;
 import francescocristiano.U5_W2_D5_Progetto.exceptions.NotFoundException;
@@ -27,6 +28,9 @@ public class EmployeeService {
     @Autowired
     private Cloudinary cloudinaryService;
 
+    @Autowired
+    private MailgunSender mailgunSender;
+
     public Employee saveEmployee(NewEmployeeDTO employeePayload) {
         employeeRepository.findByUsername(employeePayload.username()).ifPresent(employee -> {
             throw new BadRequestException("Username already exists");
@@ -35,6 +39,7 @@ public class EmployeeService {
             throw new BadRequestException("Email already exists");
         });
         Employee newEmployee = new Employee(employeePayload.username(), employeePayload.name(), employeePayload.surname(), employeePayload.email());
+        mailgunSender.sendRegistrationEmail(newEmployee);
         return employeeRepository.save(newEmployee);
     }
 

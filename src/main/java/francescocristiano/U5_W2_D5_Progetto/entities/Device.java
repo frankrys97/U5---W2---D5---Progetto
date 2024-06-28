@@ -32,6 +32,17 @@ public class Device {
         this.deviceType = deviceType;
         this.deviceStatus = deviceStatus;
         this.employee = employee;
+
+        validateDevice();
+    }
+
+    private void validateDevice() {
+        if (this.deviceStatus == DeviceStatus.ASSIGNED && this.employee == null) {
+            throw new IllegalArgumentException("An assigned device must have an employee");
+        }
+        if (this.deviceStatus != DeviceStatus.ASSIGNED && this.employee != null) {
+            throw new IllegalArgumentException("Only an assigned device can have an employee");
+        }
     }
 
 

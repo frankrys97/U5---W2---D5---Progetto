@@ -1,7 +1,11 @@
 package francescocristiano.U5_W2_D5_Progetto.services;
 
 import francescocristiano.U5_W2_D5_Progetto.entities.Device;
-import francescocristiano.U5_W2_D5_Progetto.expetions.NotFoundException;
+import francescocristiano.U5_W2_D5_Progetto.entities.Employee;
+import francescocristiano.U5_W2_D5_Progetto.enums.DeviceStatus;
+import francescocristiano.U5_W2_D5_Progetto.enums.DeviceType;
+import francescocristiano.U5_W2_D5_Progetto.exceptions.NotFoundException;
+import francescocristiano.U5_W2_D5_Progetto.payloads.NewDeviceDTO;
 import francescocristiano.U5_W2_D5_Progetto.repositories.DeviceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,8 +22,16 @@ public class DeviceService {
     @Autowired
     private DeviceRepository deviceRepository;
 
-    public Device saveDevice(Device device) {
-        return deviceRepository.save(device);
+    @Autowired
+    private EmployeeService employeeService;
+
+    public Device saveDevice(NewDeviceDTO devicePayload) {
+        Employee employee = null;
+        if (devicePayload.employeeId() != null) {
+            employee = employeeService.findEmployeeById(devicePayload.employeeId());
+        }
+        Device newDevice = new Device(DeviceType.getDeviceType(devicePayload.deviceType()), DeviceStatus.getDeviceStatus(devicePayload.deviceStatus()), employee);
+        return deviceRepository.save(newDevice);
     }
 
     public Device findDeviceById(UUID id) {
@@ -33,7 +45,8 @@ public class DeviceService {
         return deviceRepository.findAll(pageable);
     }
 
-    public Device findDeviceByIdAndUpdate(UUID id, Device updatedDevice) {
+    public Device findDeviceByIdAndUpdate(UUID id, NewDeviceDTO updatedDevicePayload) {
+        Device updatedDevice = new Device(DeviceType.getDeviceType(updatedDevicePayload.deviceType()), DeviceStatus.getDeviceStatus(updatedDevicePayload.deviceStatus()), updatedDevicePayload.employeeId() != null ? employeeService.findEmployeeById(updatedDevicePayload.employeeId()) : null);
         Device foundDevice = findDeviceById(id);
         foundDevice.setDeviceType(updatedDevice.getDeviceType());
         foundDevice.setDeviceStatus(updatedDevice.getDeviceStatus());

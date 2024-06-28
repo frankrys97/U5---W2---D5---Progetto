@@ -1,7 +1,9 @@
 package francescocristiano.U5_W2_D5_Progetto.services;
 
 import francescocristiano.U5_W2_D5_Progetto.entities.Employee;
-import francescocristiano.U5_W2_D5_Progetto.expetions.NotFoundException;
+import francescocristiano.U5_W2_D5_Progetto.exceptions.BadRequestException;
+import francescocristiano.U5_W2_D5_Progetto.exceptions.NotFoundException;
+import francescocristiano.U5_W2_D5_Progetto.payloads.NewEmployeeDTO;
 import francescocristiano.U5_W2_D5_Progetto.repositories.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,8 +19,12 @@ public class EmployeeService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
-    public Employee saveEmployee(Employee employee) {
-        return employeeRepository.save(employee);
+    public Employee saveEmployee(NewEmployeeDTO employeePayload) {
+        employeeRepository.findByUsername(employeePayload.username()).ifPresent(employee -> {
+            throw new BadRequestException("Username already exists");
+        });
+        Employee newEmployee = new Employee(employeePayload.username(), employeePayload.name(), employeePayload.surname(), employeePayload.email());
+        return employeeRepository.save(newEmployee);
     }
 
     public Employee findEmployeeById(UUID id) {
@@ -32,7 +38,8 @@ public class EmployeeService {
         return employeeRepository.findAll(pageable);
     }
 
-    public Employee findEmployeeByIdAndUpdate(UUID id, Employee updatedEmployee) {
+    public Employee findEmployeeByIdAndUpdate(UUID id, NewEmployeeDTO updatedEmployeePayload) {
+        Employee updatedEmployee = new Employee(updatedEmployeePayload.username(), updatedEmployeePayload.name(), updatedEmployeePayload.surname(), updatedEmployeePayload.email());
         Employee foundEmployee = findEmployeeById(id);
         foundEmployee.setUsername(updatedEmployee.getUsername());
         foundEmployee.setName(updatedEmployee.getName());

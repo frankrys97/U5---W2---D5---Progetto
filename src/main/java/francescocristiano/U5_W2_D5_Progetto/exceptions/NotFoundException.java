@@ -1,4 +1,4 @@
-package francescocristiano.U5_W2_D5_Progetto.expetions;
+package francescocristiano.U5_W2_D5_Progetto.exceptions;
 
 import java.util.UUID;
 

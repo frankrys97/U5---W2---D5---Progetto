@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeService {
@@ -60,8 +61,15 @@ public class EmployeeService {
     }
 
     public void deleteEmployeeById(UUID id) {
+
+        Employee foundEmployee = findEmployeeById(id);
+        if (!foundEmployee.getDevices().isEmpty()) {
+            String devicesList = foundEmployee.getDevices().stream().map(device -> device.getDeviceType().name() + " (" + device.getId() + ")").collect(Collectors.joining(", "));
+            throw new BadRequestException("Cannot delete employee with assigned devices: " + devicesList + ". Please unassign them first");
+        }
         employeeRepository.deleteById(id);
     }
+
 
     public Employee uploadAvatar(UUID id, MultipartFile file) throws IOException {
         String cloudinaryUrl = cloudinaryService.uploader().upload(file.getBytes(), ObjectUtils.emptyMap()).get("url").toString();

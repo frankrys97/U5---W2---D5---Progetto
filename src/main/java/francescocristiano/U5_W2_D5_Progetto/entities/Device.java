@@ -1,6 +1,7 @@
 package francescocristiano.U5_W2_D5_Progetto.entities;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import francescocristiano.U5_W2_D5_Progetto.enums.DeviceStatus;
 import francescocristiano.U5_W2_D5_Progetto.enums.DeviceType;
 import jakarta.persistence.*;
@@ -26,6 +27,10 @@ public class Device {
     @Setter
     @ManyToOne
     @JoinColumn(name = "user_id")
+/*
+    @JsonBackReference
+*/
+    @JsonManagedReference
     private Employee employee;
 
     public Device(DeviceType deviceType, DeviceStatus deviceStatus, Employee employee) {

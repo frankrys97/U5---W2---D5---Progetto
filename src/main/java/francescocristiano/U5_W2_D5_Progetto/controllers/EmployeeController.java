@@ -11,7 +11,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -55,6 +57,11 @@ public class EmployeeController {
             throw new BadRequestException(validationResult.getAllErrors().stream().map(ObjectError::getDefaultMessage).collect(Collectors.joining(", ")));
         }
         return employeeService.findEmployeeByIdAndUpdate(id, employeePayload);
+    }
+
+    @PostMapping("/{id}/avatar")
+    public Employee uploadAvatar(@PathVariable UUID id, @RequestParam("avatar") MultipartFile file) throws IOException {
+        return employeeService.uploadAvatar(id, file);
     }
 
 }

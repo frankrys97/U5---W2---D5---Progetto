@@ -1,5 +1,7 @@
 package francescocristiano.U5_W2_D5_Progetto.services;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import francescocristiano.U5_W2_D5_Progetto.entities.Employee;
 import francescocristiano.U5_W2_D5_Progetto.exceptions.BadRequestException;
 import francescocristiano.U5_W2_D5_Progetto.exceptions.NotFoundException;
@@ -11,13 +13,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.UUID;
 
 @Service
 public class EmployeeService {
     @Autowired
     private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private Cloudinary cloudinaryService;
 
     public Employee saveEmployee(NewEmployeeDTO employeePayload) {
         employeeRepository.findByUsername(employeePayload.username()).ifPresent(employee -> {
@@ -54,5 +61,12 @@ public class EmployeeService {
 
     public void deleteEmployeeById(UUID id) {
         employeeRepository.deleteById(id);
+    }
+
+    public Employee uploadAvatar(UUID id, MultipartFile file) throws IOException {
+        String cloudinaryUrl = cloudinaryService.uploader().upload(file.getBytes(), ObjectUtils.emptyMap()).get("url").toString();
+        Employee foundEmployee = findEmployeeById(id);
+        foundEmployee.setAvatarUrl(cloudinaryUrl);
+        return employeeRepository.save(foundEmployee);
     }
 }

@@ -6,6 +6,7 @@ import francescocristiano.U5_W2_D5_Progetto.enums.DeviceStatus;
 import francescocristiano.U5_W2_D5_Progetto.enums.DeviceType;
 import francescocristiano.U5_W2_D5_Progetto.exceptions.BadRequestException;
 import francescocristiano.U5_W2_D5_Progetto.exceptions.NotFoundException;
+import francescocristiano.U5_W2_D5_Progetto.payloads.NewAssignmentDTO;
 import francescocristiano.U5_W2_D5_Progetto.payloads.NewDeviceDTO;
 import francescocristiano.U5_W2_D5_Progetto.payloads.NewUpdateDeviceDTO;
 import francescocristiano.U5_W2_D5_Progetto.repositories.DeviceRepository;
@@ -62,9 +63,14 @@ public class DeviceService {
         deviceRepository.deleteById(id);
     }
 
-    public Device assignDeviceToEmployee(UUID id, UUID employeeId) {
+    public Device assignDeviceToEmployee(UUID id, NewAssignmentDTO employeeIdPayload) {
         Device device = findDeviceById(id);
-        Employee employee = employeeService.findEmployeeById(employeeId);
+        if (employeeIdPayload.employeeId() == null) {
+            device.setEmployee(null);
+            device.setDeviceStatus(DeviceStatus.ONLINE);
+            return deviceRepository.save(device);
+        }
+        Employee employee = employeeService.findEmployeeById(employeeIdPayload.employeeId());
        /* if (device.getDeviceStatus() == DeviceStatus.ASSIGNED) {
             throw new BadRequestException("Device is already assigned to an employee");
         }

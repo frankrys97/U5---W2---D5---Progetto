@@ -3,6 +3,7 @@ package francescocristiano.U5_W2_D5_Progetto.controllers;
 
 import francescocristiano.U5_W2_D5_Progetto.entities.Device;
 import francescocristiano.U5_W2_D5_Progetto.exceptions.BadRequestException;
+import francescocristiano.U5_W2_D5_Progetto.payloads.NewAssignmentDTO;
 import francescocristiano.U5_W2_D5_Progetto.payloads.NewDeviceDTO;
 import francescocristiano.U5_W2_D5_Progetto.payloads.NewUpdateDeviceDTO;
 import francescocristiano.U5_W2_D5_Progetto.services.DeviceService;
@@ -60,9 +61,9 @@ public class DeviceController {
         return deviceService.findDeviceByIdAndUpdate(id, devicePayload);
     }
 
-    @PatchMapping("/{id}/assign")
-    public Device assignDeviceToEmployee(@PathVariable UUID id, @RequestParam UUID employeeId) {
-        return deviceService.assignDeviceToEmployee(id, employeeId);
+    @PatchMapping("/{id}/assignment")
+    public Device assignDeviceToEmployee(@PathVariable UUID id, @RequestBody NewAssignmentDTO assignmentPayload) {
+        return deviceService.assignDeviceToEmployee(id, assignmentPayload);
     }
 
 

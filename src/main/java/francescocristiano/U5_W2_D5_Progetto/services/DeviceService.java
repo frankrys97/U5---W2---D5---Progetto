@@ -71,15 +71,6 @@ public class DeviceService {
             return deviceRepository.save(device);
         }
         Employee employee = employeeService.findEmployeeById(employeeIdPayload.employeeId());
-       /* if (device.getDeviceStatus() == DeviceStatus.ASSIGNED) {
-            throw new BadRequestException("Device is already assigned to an employee");
-        }
-
-        Ho preferito non usare questo controllo che avevo implementato all'inizio perchè in questo modo
-        avrebbe reso il dipendente collegato ad un dispositivo assegnato immutabile, mentre
-        io volevo qualcosa di più flessibile
-
-        */
         device.setEmployee(employee);
         if (device.getDeviceStatus() != DeviceStatus.ASSIGNED) {
             device.setDeviceStatus(DeviceStatus.ASSIGNED);
